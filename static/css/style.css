@@ -115,6 +115,32 @@ img { max-width: 100%; display: block; }
 .produto-preco { color: var(--verde-escuro); font-family: "Baloo 2"; font-size: 1.15rem; font-weight: 700; }
 .produto-preco small { color: var(--muted); font-size: .75rem; font-weight: 600; }
 
+/* Carrossel dos brinquedos (cards maiores) */
+.carrossel { position: relative; }
+.produtos-trilho {
+  display: flex; gap: 1.4rem; overflow-x: auto; scroll-snap-type: x mandatory;
+  scroll-behavior: smooth; padding: .6rem .3rem 1.3rem; scrollbar-width: thin;
+}
+.produtos-trilho::-webkit-scrollbar { height: 8px; }
+.produtos-trilho::-webkit-scrollbar-thumb { background: var(--linha); border-radius: 999px; }
+.produtos-trilho .produto-card { flex: 0 0 330px; max-width: 330px; scroll-snap-align: start; }
+.produtos-trilho .produto-card h3 { font-size: 1.35rem; }
+.produtos-trilho .produto-preco { font-size: 1.3rem; }
+.carrossel-btn {
+  align-items: center; background: #fff; border: 1px solid var(--linha); border-radius: 50%;
+  box-shadow: var(--sombra); color: var(--verde-escuro); cursor: pointer; display: flex;
+  font-size: 1.1rem; height: 50px; justify-content: center; position: absolute; top: 40%;
+  transform: translateY(-50%); width: 50px; z-index: 6; transition: background .15s, color .15s;
+}
+.carrossel-btn:hover { background: var(--verde); color: #fff; }
+.carrossel-btn.prev { left: -12px; }
+.carrossel-btn.next { right: -12px; }
+.carrossel-btn.oculto { display: none; }
+@media (max-width: 760px) {
+  .produtos-trilho .produto-card { flex-basis: 78vw; max-width: 78vw; }
+  .carrossel-btn { display: none; }
+}
+
 /* Depoimentos */
 .depo-home, .pagina .depo-grid { margin: 0 auto; max-width: 1200px; padding: 1rem clamp(1rem, 4vw, 2rem); text-align: center; }
 .depo-home h2 { font-size: 2rem; }

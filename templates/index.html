@@ -33,7 +33,9 @@
     <h2>{{ cat.nome }}</h2>
     <p>{{ itens|length }} opç{{ itens|length|pluralize:"ão,ões" }} para a sua festa</p>
   </div>
-  <div class="produtos-grid">
+  <div class="carrossel">
+    <button class="carrossel-btn prev" type="button" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="produtos-trilho">
     {% for b in itens %}
     <article class="produto-card">
       <div class="produto-img">
@@ -55,6 +57,8 @@
       </div>
     </article>
     {% endfor %}
+    </div>
+    <button class="carrossel-btn next" type="button" aria-label="Próximo"><i class="fa-solid fa-chevron-right"></i></button>
   </div>
 </section>
 {% endfor %}
@@ -93,6 +97,31 @@
       i = (i + 1) % imgs.length;
       imgs[i].classList.add("ativo");
     }, 4000);
+  })();
+
+  // Carrossel dos brinquedos: setas rolam a trilha; some quando chega no fim.
+  (function () {
+    document.querySelectorAll(".carrossel").forEach(function (car) {
+      var trilho = car.querySelector(".produtos-trilho");
+      var prev = car.querySelector(".prev");
+      var next = car.querySelector(".next");
+      if (!trilho) return;
+
+      function passo() {
+        var card = trilho.querySelector(".produto-card");
+        return card ? card.offsetWidth + 22 : 320;
+      }
+      function atualizar() {
+        var fim = trilho.scrollLeft + trilho.clientWidth >= trilho.scrollWidth - 4;
+        prev.classList.toggle("oculto", trilho.scrollLeft <= 4);
+        next.classList.toggle("oculto", fim);
+      }
+      prev.addEventListener("click", function () { trilho.scrollBy({ left: -passo() * 2, behavior: "smooth" }); });
+      next.addEventListener("click", function () { trilho.scrollBy({ left: passo() * 2, behavior: "smooth" }); });
+      trilho.addEventListener("scroll", atualizar);
+      window.addEventListener("resize", atualizar);
+      atualizar();
+    });
   })();
 </script>
 {% endblock %}
