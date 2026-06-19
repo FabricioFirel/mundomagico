@@ -111,9 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -124,6 +124,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Login do painel (área administrativa, dentro do site).
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'painel'
+LOGOUT_REDIRECT_URL = 'index'
+
+# Dados do negócio (configuráveis por variável de ambiente).
+EMPRESA = {
+    'nome': 'Mundo Mágico CM',
+    'cidade': 'Brasília - DF',
+    'whatsapp': os.environ.get('WHATSAPP_NUMBER', '5561991540133'),
+    'instagram': os.environ.get('INSTAGRAM_URL', 'https://instagram.com/'),
+}
+MAX_EVENTOS_DIA = int(os.environ.get('MAX_EVENTOS_DIA', '3'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

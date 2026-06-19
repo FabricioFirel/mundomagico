@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Contato — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="pagina">
+  <div class="pagina-hero">
+    <h1>Fale com a gente</h1>
+    <p>Atendimento rápido pelo WhatsApp para tirar dúvidas e fechar sua festa.</p>
+  </div>
+
+  <div class="contato-grid">
+    <a href="https://wa.me/{{ empresa.whatsapp }}" class="contato-card">
+      <i class="fa-brands fa-whatsapp"></i>
+      <h3>WhatsApp</h3>
+      <p>Resposta rápida e orçamento na hora.</p>
+    </a>
+    <a href="{{ empresa.instagram }}" class="contato-card">
+      <i class="fa-brands fa-instagram"></i>
+      <h3>Instagram</h3>
+      <p>Veja fotos das festas e novidades.</p>
+    </a>
+    <div class="contato-card">
+      <i class="fa-solid fa-location-dot"></i>
+      <h3>Onde estamos</h3>
+      <p>{{ empresa.cidade }} e região.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

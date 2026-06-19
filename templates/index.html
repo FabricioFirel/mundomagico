@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% load loja_extras %}
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <span class="hero-eyebrow">Festas & eventos infantis</span>
+    <h1>Diversão que faz a festa <span>mágica</span>!</h1>
+    <p>Aluguel de infláveis, jogos de mesa e estações digitais em {{ empresa.cidade }}. Monte seu pacote e receba o orçamento na hora pelo WhatsApp.</p>
+    <div class="hero-actions">
+      <a href="#inflaveis" class="btn btn-primary">Ver brinquedos</a>
+      <a href="https://wa.me/{{ empresa.whatsapp }}" class="btn btn-ghost"><i class="fa-brands fa-whatsapp"></i> Falar agora</a>
+    </div>
+  </div>
+  <div class="hero-slider">
+    {% for b in destaques %}
+      <img src="{% static b.imagem_url %}" alt="{{ b.nome }}" class="hero-img {% if forloop.first %}ativo{% endif %}" />
+    {% empty %}
+      <img src="{% static 'img/castelo.jpg' %}" alt="Castelo inflável" class="hero-img ativo" />
+    {% endfor %}
+  </div>
+</section>
+
+<section class="vantagens">
+  <div class="vantagem"><i class="fa-solid fa-shield-heart"></i><span>Brinquedos higienizados e seguros</span></div>
+  <div class="vantagem"><i class="fa-solid fa-truck-fast"></i><span>Entrega e montagem inclusas</span></div>
+  <div class="vantagem"><i class="fa-solid fa-clock"></i><span>Orçamento na hora pelo WhatsApp</span></div>
+</section>
+
+{% for cat, itens in vitrines %}
+<section class="vitrine" id="{{ cat.slug }}">
+  <div class="vitrine-head">
+    <h2>{{ cat.nome }}</h2>
+    <p>{{ itens|length }} opç{{ itens|length|pluralize:"ão,ões" }} para a sua festa</p>
+  </div>
+  <div class="produtos-grid">
+    {% for b in itens %}
+    <article class="produto-card">
+      <div class="produto-img">
+        <img src="{% static b.imagem_url %}" alt="{{ b.nome }}"
+             onerror="this.src='{% static 'img/mundomagicomascote.png' %}'" />
+        {% if b.destaque %}<span class="badge-destaque">Destaque</span>{% endif %}
+      </div>
+      <div class="produto-body">
+        <h3>{{ b.nome }}</h3>
+        {% if b.descricao %}<p class="produto-desc">{{ b.descricao }}</p>{% endif %}
+        <div class="produto-rodape">
+          <span class="produto-preco">R$ {{ b.valor|moeda }} <small>até 4h</small></span>
+          <button class="btn btn-add"
+                  data-nome="{{ b.nome }}" data-valor="{{ b.valor|stringformat:'.2f' }}"
+                  data-imagem="{% static b.imagem_url %}">
+            <i class="fa-solid fa-plus"></i> Adicionar
+          </button>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+{% if depoimentos %}
+<section class="depo-home">
+  <h2>O que dizem as famílias</h2>
+  <div class="depo-grid">
+    {% for d in depoimentos %}
+    <figure class="depo-card">
+      <i class="fa-solid fa-quote-left"></i>
+      <blockquote>{{ d.texto }}</blockquote>
+      <figcaption>{{ d.nome }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+  <a href="{% url 'depoimentos' %}" class="btn btn-ghost">Ver todos os depoimentos</a>
+</section>
+{% endif %}
+
+<section class="cta-final">
+  <h2>Pronto para garantir a diversão?</h2>
+  <p>Escolha os brinquedos, monte seu carrinho e finalize em segundos pelo WhatsApp.</p>
+  <a href="#inflaveis" class="btn btn-primary">Montar meu pacote</a>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var imgs = document.querySelectorAll(".hero-slider .hero-img");
+    if (imgs.length < 2) return;
+    var i = 0;
+    setInterval(function () {
+      imgs[i].classList.remove("ativo");
+      i = (i + 1) % imgs.length;
+      imgs[i].classList.add("ativo");
+    }, 4000);
+  })();
+</script>
+{% endblock %}

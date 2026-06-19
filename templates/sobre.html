@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Sobre nós — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="pagina">
+  <div class="pagina-hero">
+    <h1>Sobre o Mundo Mágico CM</h1>
+    <p>Transformamos festas em momentos inesquecíveis em {{ empresa.cidade }}.</p>
+  </div>
+
+  <div class="conteudo-2col">
+    <div>
+      <h2>Nossa história</h2>
+      <p>O Mundo Mágico CM é uma empresa de {{ empresa.cidade }} especializada na locação de brinquedos para festas e eventos infantis. Trabalhamos com infláveis, jogos de mesa e estações digitais, sempre com foco em segurança, higiene e na alegria das crianças.</p>
+      <p>Nosso objetivo é facilitar a vida de quem organiza a festa: você escolhe os brinquedos, monta o pacote e recebe o orçamento na hora. A entrega e a montagem ficam por nossa conta.</p>
+    </div>
+    <div class="cards-valores">
+      <div class="valor-card"><i class="fa-solid fa-shield-heart"></i><h3>Segurança</h3><p>Equipamentos revisados e montados por profissionais.</p></div>
+      <div class="valor-card"><i class="fa-solid fa-broom"></i><h3>Higiene</h3><p>Brinquedos higienizados a cada locação.</p></div>
+      <div class="valor-card"><i class="fa-solid fa-heart"></i><h3>Inclusão</h3><p>Apoiamos a diversão de todas as crianças.</p></div>
+    </div>
+  </div>
+
+  <div class="cta-final">
+    <h2>Vamos montar a sua festa?</h2>
+    <a href="{% url 'index' %}#inflaveis" class="btn btn-primary">Ver brinquedos</a>
+  </div>
+</section>
+{% endblock %}

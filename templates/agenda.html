@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Agenda — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="admin">
+  <div class="admin-head">
+    <h1>Agenda de eventos</h1>
+    <a href="{% url 'painel' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Painel</a>
+  </div>
+
+  <div class="agenda-bar">
+    <a href="{% url 'agenda' %}?ano={{ nav.ano_ant }}&mes={{ nav.mes_ant }}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-chevron-left"></i></a>
+    <h2>{{ mes_nome }} de {{ ano }}</h2>
+    <a href="{% url 'agenda' %}?ano={{ nav.ano_prox }}&mes={{ nav.mes_prox }}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-chevron-right"></i></a>
+    <span class="agenda-cap">Capacidade: até {{ capacidade }} locais por dia</span>
+  </div>
+
+  <div class="calendario">
+    <div class="cal-cabecalho">
+      {% for d in dias_semana %}<div>{{ d }}</div>{% endfor %}
+    </div>
+    {% for semana in semanas %}
+    <div class="cal-semana">
+      {% for cell in semana %}
+        <div class="cal-dia {% if not cell.no_mes %}fora{% endif %} {% if cell.hoje %}hoje{% endif %}">
+          <div class="cal-dia-topo">
+            <span class="cal-num">{{ cell.dia.day }}</span>
+            {% if cell.no_mes %}
+              {% if cell.livres <= 0 %}<span class="cal-slot cheio">Lotado</span>
+              {% else %}<span class="cal-slot livre">{{ cell.livres }} livre{{ cell.livres|pluralize }}</span>{% endif %}
+            {% endif %}
+          </div>
+          <div class="cal-eventos">
+            {% for b in cell.bloqueios %}
+            <div class="cal-evento bloqueio" title="Bloqueio: {{ b.motivo|default:'sem motivo' }}">
+              <i class="fa-solid fa-ban"></i>
+              {% if b.dia_inteiro %}Dia bloqueado{% else %}{{ b.slots }} local(is){% endif %}
+              {% if b.hora_inicio %} {{ b.hora_inicio|time:"H:i" }}{% if b.hora_fim %}-{{ b.hora_fim|time:"H:i" }}{% endif %}{% endif %}
+              <form method="post" action="{% url 'bloqueio_excluir' b.id %}" class="bloq-x" onsubmit="return confirm('Remover bloqueio?')">{% csrf_token %}
+                <button title="Remover bloqueio">&times;</button>
+              </form>
+            </div>
+            {% endfor %}
+            {% for e in cell.eventos %}
+            <div class="cal-evento status-{{ e.status }}" title="{{ e.nome_cliente }} · {{ e.local_evento }} · {{ e.status }}">
+              <strong>{{ e.hora_inicio|time:"H:i" }}</strong> {{ e.nome_cliente }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="agenda-legenda">
+    <span><i class="ponto status-pendente"></i> Pendente</span>
+    <span><i class="ponto status-pago"></i> Pago</span>
+    <span><i class="ponto status-cancelado"></i> Cancelado</span>
+    <span><i class="ponto bloqueio"></i> Bloqueado</span>
+  </div>
+
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-ban"></i> Bloquear disponibilidade</h2>
+    <p class="vazio">Use para folgas, feriados ou quando a equipe já estiver comprometida. O bloqueio reduz os horários disponíveis daquele dia.</p>
+    <form method="post" action="{% url 'bloqueio_criar' %}" class="form-bloqueio">
+      {% csrf_token %}
+      <label>Data<input type="date" name="data" required /></label>
+      <label>Tipo
+        <select name="tipo" id="bloqueio-tipo">
+          <option value="dia">Dia inteiro</option>
+          <option value="slots">Alguns locais</option>
+        </select></label>
+      <label id="campo-slots" hidden>Quantos locais<input type="number" name="slots" min="1" max="{{ capacidade }}" value="1" /></label>
+      <label>De<input type="time" name="hora_inicio" /></label>
+      <label>Até<input type="time" name="hora_fim" /></label>
+      <label class="full">Motivo<input type="text" name="motivo" placeholder="Ex.: folga da equipe, manutenção, feriado" /></label>
+      <button type="submit" class="btn btn-primary">Bloquear</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var tipo = document.getElementById("bloqueio-tipo");
+    var campo = document.getElementById("campo-slots");
+    if (!tipo || !campo) return;
+    function alternar() { campo.hidden = tipo.value !== "slots"; }
+    tipo.addEventListener("change", alternar);
+    alternar();
+  })();
+</script>
+{% endblock %}

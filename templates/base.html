@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ empresa.nome }}{% endblock %}</title>
+    <meta name="description" content="Locação de brinquedos para festas e eventos infantis em {{ empresa.cidade }}." />
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <header class="navbar">
+      <a href="{% url 'index' %}" class="brand">
+        <img src="{% static 'img/mundomagicomascote.png' %}" alt="{{ empresa.nome }}" />
+        <span>Mundo Mágico <strong>CM</strong></span>
+      </a>
+      <input type="checkbox" id="menu-toggle" hidden />
+      <label for="menu-toggle" class="menu-btn"><i class="fa-solid fa-bars"></i></label>
+      <nav class="menu">
+        <a href="{% url 'index' %}#inflaveis">Brinquedos</a>
+        <a href="{% url 'sobre' %}">Sobre nós</a>
+        <a href="{% url 'depoimentos' %}">Depoimentos</a>
+        <a href="{% url 'contato' %}">Contato</a>
+        <a href="{% url 'carrinho' %}" class="nav-cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" data-cart-count>0</span>
+        </a>
+      </nav>
+    </header>
+
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for message in messages %}
+          <div class="flash {% if 'error' in message.tags %}erro{% else %}ok{% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="footer">
+      <div class="footer-grid">
+        <div>
+          <h3>Mundo Mágico CM</h3>
+          <p>Locação de brinquedos para festas e eventos infantis em {{ empresa.cidade }}.</p>
+        </div>
+        <div>
+          <h4>Contato</h4>
+          <p><a href="https://wa.me/{{ empresa.whatsapp }}"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a></p>
+          <p><a href="{{ empresa.instagram }}"><i class="fa-brands fa-instagram"></i> Instagram</a></p>
+        </div>
+        <div>
+          <h4>Atalhos</h4>
+          <p><a href="{% url 'index' %}">Brinquedos</a></p>
+          <p><a href="{% url 'depoimentos' %}">Depoimentos</a></p>
+          <p><a href="{% url 'login' %}">Área administrativa</a></p>
+        </div>
+      </div>
+      <p class="footer-bottom">© {{ empresa.nome }} — {{ empresa.cidade }}. Feito com carinho para a sua festa.</p>
+    </footer>
+
+    <a href="https://wa.me/{{ empresa.whatsapp }}" class="whatsapp-float" aria-label="Falar no WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="{% static 'js/carrinho.js' %}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
