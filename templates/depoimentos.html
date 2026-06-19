@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Depoimentos — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="pagina">
+  <div class="pagina-hero">
+    <h1>Depoimentos</h1>
+    <p>O que as famílias falam sobre as festas com o Mundo Mágico CM.</p>
+  </div>
+
+  <div class="depo-grid">
+    {% for d in depoimentos %}
+    <figure class="depo-card">
+      {% if d.imagem_url %}<img src="{{ url_for('static', filename=d.imagem_url) }}" alt="{{ d.nome }}" class="depo-foto" />{% endif %}
+      <i class="fa-solid fa-quote-left"></i>
+      <blockquote>{{ d.texto }}</blockquote>
+      <figcaption>{{ d.nome }}</figcaption>
+    </figure>
+    {% else %}
+    <p class="vazio">Ainda não há depoimentos publicados. Seja o primeiro!</p>
+    {% endfor %}
+  </div>
+
+  <div class="form-depoimento">
+    <h2>Deixe o seu depoimento</h2>
+    <p>Conte como foi a sua festa. Publicamos após uma rápida aprovação.</p>
+    <form method="post">
+      <label>Seu nome
+        <input type="text" name="nome" required maxlength="120" /></label>
+      <label>Seu depoimento
+        <textarea name="texto" rows="4" required maxlength="600"></textarea></label>
+      <button type="submit" class="btn btn-primary">Enviar depoimento</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Painel — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="admin">
+  <div class="admin-head">
+    <h1>Painel administrativo</h1>
+    <div class="admin-head-acoes">
+      <a href="{{ url_for('admin_agenda') }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+    </div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="stat"><span>{{ brinquedos|length }}</span><p>Brinquedos</p></div>
+    <div class="stat"><span>{{ reservas|length }}</span><p>Reservas</p></div>
+    <div class="stat"><span>{{ reservas|selectattr('status','equalto','pendente')|list|length }}</span><p>Pendentes</p></div>
+    <div class="stat"><span>R$ {{ '%.2f'|format(receita)|replace('.', ',') }}</span><p>Receita (paga)</p></div>
+  </div>
+
+  <!-- Reservas -->
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-calendar-check"></i> Reservas</h2>
+    {% if reservas %}
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>Cliente</th><th>Data</th><th>Local</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for r in reservas %}
+          <tr>
+            <td>{{ r.nome_cliente }}<br /><small>{{ r.telefone_cliente }}</small></td>
+            <td>{{ r.data_evento }}<br /><small>{{ r.hora_inicio }} · {{ r.qtd_horas }}h</small></td>
+            <td>{{ r.local_evento }}</td>
+            <td>R$ {{ '%.2f'|format(r.valor_total|float)|replace('.', ',') }}</td>
+            <td><span class="tag status-{{ r.status }}">{{ r.status }}</span></td>
+            <td>
+              <form method="post" action="{{ url_for('admin_reserva_status', rid=r.id) }}" class="inline-form">
+                <select name="status" onchange="this.form.submit()">
+                  <option value="pendente" {{ 'selected' if r.status=='pendente' }}>pendente</option>
+                  <option value="pago" {{ 'selected' if r.status=='pago' }}>pago</option>
+                  <option value="cancelado" {{ 'selected' if r.status=='cancelado' }}>cancelado</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="vazio">Nenhuma reserva ainda.</p>{% endif %}
+  </div>
+
+  <!-- Depoimentos pendentes -->
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-comment-dots"></i> Depoimentos a aprovar</h2>
+    {% if depoimentos_pendentes %}
+      {% for d in depoimentos_pendentes %}
+      <div class="depo-pendente">
+        <div><strong>{{ d.nome }}</strong><p>{{ d.texto }}</p></div>
+        <div class="depo-acoes">
+          <form method="post" action="{{ url_for('admin_depoimento_aprovar', did=d.id) }}"><button class="btn btn-sm btn-primary">Aprovar</button></form>
+          <form method="post" action="{{ url_for('admin_depoimento_excluir', did=d.id) }}"><button class="btn btn-sm btn-danger">Excluir</button></form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}<p class="vazio">Nenhum depoimento pendente.</p>{% endif %}
+  </div>
+
+  <!-- Novo brinquedo -->
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-plus"></i> Adicionar brinquedo</h2>
+    <form method="post" action="{{ url_for('admin_brinquedo_criar') }}" class="form-brinquedo">
+      <label>Nome<input type="text" name="nome" required /></label>
+      <label>Valor até 4h<input type="number" name="valor_ate_4h" step="0.01" min="0" required /></label>
+      <label>Categoria
+        <select name="categoria_id">
+          {% for c in categorias %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}
+        </select></label>
+      <label>Imagem (caminho)<input type="text" name="imagem_url" placeholder="img/castelo.jpg" /></label>
+      <label class="full">Descrição<input type="text" name="descricao" /></label>
+      <label class="check"><input type="checkbox" name="destaque" /> Destaque</label>
+      <button type="submit" class="btn btn-primary">Adicionar</button>
+    </form>
+  </div>
+
+  <!-- Lista de brinquedos -->
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-cubes"></i> Catálogo</h2>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Categoria</th><th>Valor (4h)</th><th>Destaque</th><th>Ativo</th><th></th></tr></thead>
+        <tbody>
+          {% for b in brinquedos %}
+          <tr>
+            <form method="post" action="{{ url_for('admin_brinquedo_editar', bid=b.id) }}" id="form-b-{{ b.id }}"></form>
+            <td><input form="form-b-{{ b.id }}" type="text" name="nome" value="{{ b.nome }}" /></td>
+            <td>
+              <select form="form-b-{{ b.id }}" name="categoria_id">
+                {% for c in categorias %}<option value="{{ c.id }}" {{ 'selected' if b.categoria_id==c.id }}>{{ c.nome }}</option>{% endfor %}
+              </select>
+            </td>
+            <td><input form="form-b-{{ b.id }}" type="number" step="0.01" name="valor_ate_4h" value="{{ '%.2f'|format(b.valor) }}" class="input-preco" /></td>
+            <td style="text-align:center"><input form="form-b-{{ b.id }}" type="checkbox" name="destaque" {{ 'checked' if b.destaque }} /></td>
+            <td style="text-align:center"><input form="form-b-{{ b.id }}" type="checkbox" name="ativo" {{ 'checked' if b.ativo }} /></td>
+            <td class="acoes-linha">
+              <input form="form-b-{{ b.id }}" type="hidden" name="imagem_url" value="{{ b.imagem_url }}" />
+              <input form="form-b-{{ b.id }}" type="hidden" name="descricao" value="{{ b.descricao }}" />
+              <button form="form-b-{{ b.id }}" class="btn btn-sm btn-primary">Salvar</button>
+              <form method="post" action="{{ url_for('admin_brinquedo_excluir', bid=b.id) }}" onsubmit="return confirm('Remover {{ b.nome }}?')">
+                <button class="btn btn-sm btn-danger">Excluir</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Acesso administrativo — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="pagina-login">
+  <form method="post" class="card-login">
+    <i class="fa-solid fa-lock"></i>
+    <h1>Área administrativa</h1>
+    <p>Acesso restrito à equipe do Mundo Mágico CM.</p>
+    <label>Usuário
+      <input type="text" name="usuario" required autofocus /></label>
+    <label>Senha
+      <input type="password" name="senha" required /></label>
+    <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+  </form>
+</section>
+{% endblock %}
