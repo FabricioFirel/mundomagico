@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load loja_extras %}
+{% block title %}Relatórios — {{ empresa.nome }}{% endblock %}
+{% block content %}
+<section class="admin">
+  <div class="admin-head">
+    <div>
+      <h1>Relatórios gerenciais</h1>
+      <p class="admin-subtitulo">Visão consolidada das reservas, receitas e conteúdos do site.</p>
+    </div>
+    <a href="{% url 'painel' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+  </div>
+
+  {% include "partials/admin_nav.html" %}
+
+  <div class="admin-stats">
+    <div class="stat"><span>{{ total_reservas }}</span><p>Reservas totais</p></div>
+    <div class="stat"><span>{{ reservas_futuras }}</span><p>Próximos eventos</p></div>
+    <div class="stat"><span>R$ {{ receita|moeda }}</span><p>Receita confirmada</p></div>
+    <div class="stat"><span>R$ {{ ticket_medio|moeda }}</span><p>Ticket médio</p></div>
+  </div>
+
+  <div class="relatorios-grid">
+    <article class="admin-card">
+      <h2><i class="fa-solid fa-chart-pie"></i> Situação das reservas</h2>
+      <div class="relatorio-linhas">
+        <div><span>Pendentes</span><strong>{{ reservas_pendentes }}</strong></div>
+        <div><span>Pagas</span><strong>{{ reservas_pagas }}</strong></div>
+        <div><span>Canceladas</span><strong>{{ reservas_canceladas }}</strong></div>
+      </div>
+    </article>
+
+    <article class="admin-card">
+      <h2><i class="fa-solid fa-cubes"></i> Catálogo</h2>
+      <div class="relatorio-linhas">
+        <div><span>Total de brinquedos</span><strong>{{ brinquedos_total }}</strong></div>
+        <div><span>Ativos no site</span><strong>{{ brinquedos_ativos }}</strong></div>
+        <div><span>Em destaque</span><strong>{{ brinquedos_destaque }}</strong></div>
+      </div>
+    </article>
+
+    <article class="admin-card">
+      <h2><i class="fa-solid fa-comments"></i> Depoimentos</h2>
+      <div class="relatorio-linhas">
+        <div><span>Total recebido</span><strong>{{ depoimentos_total }}</strong></div>
+        <div><span>Publicados</span><strong>{{ depoimentos_aprovados }}</strong></div>
+        <div><span>Aguardando revisão</span><strong>{{ depoimentos_pendentes }}</strong></div>
+      </div>
+    </article>
+
+    <article class="admin-card">
+      <h2><i class="fa-solid fa-trophy"></i> Brinquedos mais pedidos</h2>
+      {% if top_brinquedos %}
+      <ol class="ranking-lista">
+        {% for item in top_brinquedos %}<li><span>{{ item.0 }}</span><strong>{{ item.1 }} pedido{{ item.1|pluralize }}</strong></li>{% endfor %}
+      </ol>
+      {% else %}<p class="vazio">Ainda não há reservas para montar o ranking.</p>{% endif %}
+    </article>
+  </div>
+
+  <div class="admin-card">
+    <h2><i class="fa-solid fa-calendar-days"></i> Desempenho mensal</h2>
+    {% if relatorio_mensal %}
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>Mês</th><th>Reservas</th><th>Receita confirmada</th></tr></thead>
+        <tbody>
+          {% for linha in relatorio_mensal %}
+          <tr><td>{{ linha.mes }}</td><td>{{ linha.reservas }}</td><td>R$ {{ linha.receita|moeda }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="vazio">Os dados mensais aparecerão após as primeiras reservas.</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

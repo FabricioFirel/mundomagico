@@ -5,7 +5,11 @@
 <section class="hero">
   <div class="hero-text">
     <span class="hero-eyebrow">Festas & eventos infantis</span>
-    <h1>Diversão que faz a festa <span>mágica</span>!</h1>
+    <h1>Você faz a festa, <span>nós garantimos a diversão</span>
+      <i class="fa-solid fa-star faisca faisca-1"></i>
+      <i class="fa-solid fa-star faisca faisca-2"></i>
+      <i class="fa-solid fa-star faisca faisca-3"></i>
+    </h1>
     <p>Aluguel de infláveis, jogos de mesa e estações digitais em {{ empresa.cidade }}. Monte seu pacote e receba o orçamento na hora pelo WhatsApp.</p>
     <div class="hero-actions">
       <a href="#inflaveis" class="btn btn-primary">Ver brinquedos</a>
@@ -63,21 +67,27 @@
 </section>
 {% endfor %}
 
-{% if depoimentos %}
-<section class="depo-home">
-  <h2>O que dizem as famílias</h2>
-  <div class="depo-grid">
-    {% for d in depoimentos %}
-    <figure class="depo-card">
-      <i class="fa-solid fa-quote-left"></i>
-      <blockquote>{{ d.texto }}</blockquote>
-      <figcaption>{{ d.nome }}</figcaption>
-    </figure>
-    {% endfor %}
+<section class="depo-home" id="depoimentos">
+  <h2>Vídeos das nossas festas</h2>
+  <div class="depo-video-grid">
+    <div class="depo-video-card">
+      <video autoplay muted loop controls playsinline preload="auto">
+        <source src="{% static 'videos/depoimento-familia-01.mp4' %}" type="video/mp4" />
+        Seu navegador não suporta reprodução de vídeo.
+      </video>
+    </div>
+    <div class="depo-video-card">
+      <video autoplay muted loop controls playsinline preload="auto">
+        <source src="{% static 'videos/depoimento-familia-02.mp4' %}" type="video/mp4" />
+        Seu navegador não suporta reprodução de vídeo.
+      </video>
+    </div>
+    <div class="depo-video-placeholder" aria-label="Vídeo em breve">
+      <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+      <span>Vídeo em breve</span>
+    </div>
   </div>
-  <a href="{% url 'depoimentos' %}" class="btn btn-ghost">Ver todos os depoimentos</a>
 </section>
-{% endif %}
 
 <section class="cta-final">
   <h2>Pronto para garantir a diversão?</h2>
@@ -88,6 +98,12 @@
 
 {% block scripts %}
 <script>
+  document.querySelectorAll(".depo-video-card video").forEach(function (video) {
+    video.muted = true;
+    var reproducao = video.play();
+    if (reproducao) reproducao.catch(function () {});
+  });
+
   (function () {
     var imgs = document.querySelectorAll(".hero-slider .hero-img");
     if (imgs.length < 2) return;
@@ -109,15 +125,20 @@
 
       function passo() {
         var card = trilho.querySelector(".produto-card");
-        return card ? card.offsetWidth + 22 : 320;
+        var estilos = window.getComputedStyle(trilho);
+        var gap = parseFloat(estilos.columnGap || estilos.gap) || 0;
+        return card ? card.offsetWidth + gap : 320;
+      }
+      function quantidadeVisivel() {
+        return Math.max(1, Math.round(trilho.clientWidth / passo()));
       }
       function atualizar() {
         var fim = trilho.scrollLeft + trilho.clientWidth >= trilho.scrollWidth - 4;
         prev.classList.toggle("oculto", trilho.scrollLeft <= 4);
         next.classList.toggle("oculto", fim);
       }
-      prev.addEventListener("click", function () { trilho.scrollBy({ left: -passo() * 2, behavior: "smooth" }); });
-      next.addEventListener("click", function () { trilho.scrollBy({ left: passo() * 2, behavior: "smooth" }); });
+      prev.addEventListener("click", function () { trilho.scrollBy({ left: -passo() * quantidadeVisivel(), behavior: "smooth" }); });
+      next.addEventListener("click", function () { trilho.scrollBy({ left: passo() * quantidadeVisivel(), behavior: "smooth" }); });
       trilho.addEventListener("scroll", atualizar);
       window.addEventListener("resize", atualizar);
       atualizar();

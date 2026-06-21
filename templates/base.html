@@ -9,11 +9,22 @@
     <link rel="icon" href="{% static 'img/favicon.ico' %}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   </head>
   <body>
+    <div class="magia-deco" aria-hidden="true">
+      <i class="fa-solid fa-hat-wizard"></i>
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <i class="fa-solid fa-hat-wizard"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <i class="fa-solid fa-hat-wizard"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <i class="fa-solid fa-hat-wizard"></i>
+    </div>
     <header class="navbar">
       <a href="{% url 'index' %}" class="brand">
         <img src="{% static 'img/mundomagicomascote.png' %}" alt="{{ empresa.nome }}" />
@@ -26,6 +37,11 @@
         <a href="{% url 'sobre' %}">Sobre nós</a>
         <a href="{% url 'depoimentos' %}">Depoimentos</a>
         <a href="{% url 'contato' %}">Contato</a>
+        {% if request.user.is_staff %}
+          <a href="{% url 'painel' %}" class="nav-admin"><i class="fa-solid fa-chart-line"></i> Painel</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="nav-admin"><i class="fa-solid fa-user-lock"></i> Login ADM</a>
+        {% endif %}
         <a href="{% url 'carrinho' %}" class="nav-cart">
           <i class="fa-solid fa-cart-shopping"></i>
           <span class="cart-badge" data-cart-count>0</span>

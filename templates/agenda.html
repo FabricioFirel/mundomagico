@@ -7,6 +7,8 @@
     <a href="{% url 'painel' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Painel</a>
   </div>
 
+  {% include "partials/admin_nav.html" %}
+
   <div class="agenda-bar">
     <a href="{% url 'agenda' %}?ano={{ nav.ano_ant }}&mes={{ nav.mes_ant }}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-chevron-left"></i></a>
     <h2>{{ mes_nome }} de {{ ano }}</h2>

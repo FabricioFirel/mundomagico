@@ -2,6 +2,7 @@
 
 import calendar as cal
 import json
+from collections import Counter, defaultdict
 from datetime import date
 from urllib.parse import quote
 
@@ -21,6 +22,8 @@ MAX = settings.MAX_EVENTOS_DIA
 NOMES_MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
              "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
 DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+DEMO_ADMIN_EMAIL = "admbrinquedos@gmail.com"
+DEMO_ADMIN_PASSWORD = "mundomagico123"
 
 staff_required = user_passes_test(lambda u: u.is_active and u.is_staff, login_url="login")
 
@@ -197,15 +200,20 @@ def api_reservas(request):
 
 # ----------------------------- login / painel -----------------------------
 def login_view(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect("painel")
     if request.method == "POST":
         user = authenticate(request,
-                            username=(request.POST.get("usuario") or "").strip(),
+                            username=(request.POST.get("usuario") or "").strip().lower(),
                             password=request.POST.get("senha") or "")
         if user and user.is_staff:
             login(request, user)
             return redirect(request.GET.get("next") or "painel")
         messages.error(request, "Usuário ou senha inválidos.")
-    return render(request, "login.html")
+    return render(request, "login.html", {
+        "demo_email": DEMO_ADMIN_EMAIL,
+        "demo_password": DEMO_ADMIN_PASSWORD,
+    })
 
 
 def logout_view(request):
@@ -218,13 +226,60 @@ def painel(request):
     brinquedos = Brinquedo.objects.all().order_by("nome")
     reservas = Reserva.objects.all()
     pendentes = Depoimento.objects.filter(aprovado=False)
+    depoimentos = Depoimento.objects.all()
     categorias = Categoria.objects.all()
     receita = sum(float(r.valor_total) for r in reservas if r.status == "pago")
     return render(request, "painel.html", {
         "brinquedos": brinquedos, "reservas": reservas,
-        "depoimentos_pendentes": pendentes, "categorias": categorias,
+        "depoimentos": depoimentos, "depoimentos_pendentes": pendentes,
+        "categorias": categorias,
         "receita": receita,
         "reservas_pendentes": reservas.filter(status="pendente").count(),
+        "brinquedos_ativos": brinquedos.filter(ativo=True).count(),
+        "depoimentos_pendentes_total": pendentes.count(),
+    })
+
+
+@staff_required
+def relatorios(request):
+    reservas = Reserva.objects.all()
+    pagas = reservas.filter(status="pago")
+    receita = sum(float(r.valor_total) for r in pagas)
+    ticket_medio = receita / pagas.count() if pagas.count() else 0
+
+    brinquedos_contagem = Counter()
+    for reserva in reservas:
+        for item in reserva.itens or []:
+            nome = str(item.get("nome") or "Brinquedo").strip()
+            brinquedos_contagem[nome] += 1
+
+    meses = defaultdict(lambda: {"reservas": 0, "receita": 0})
+    for reserva in reservas:
+        chave = reserva.data_evento.strftime("%Y-%m")
+        meses[chave]["reservas"] += 1
+        if reserva.status == "pago":
+            meses[chave]["receita"] += float(reserva.valor_total)
+    relatorio_mensal = [
+        {"mes": f"{chave[5:7]}/{chave[:4]}", **valores}
+        for chave, valores in sorted(meses.items(), reverse=True)[:12]
+    ]
+
+    return render(request, "relatorios.html", {
+        "total_reservas": reservas.count(),
+        "reservas_pendentes": reservas.filter(status="pendente").count(),
+        "reservas_pagas": pagas.count(),
+        "reservas_canceladas": reservas.filter(status="cancelado").count(),
+        "reservas_futuras": reservas.filter(data_evento__gte=date.today()).exclude(status="cancelado").count(),
+        "receita": receita,
+        "ticket_medio": ticket_medio,
+        "brinquedos_total": Brinquedo.objects.count(),
+        "brinquedos_ativos": Brinquedo.objects.filter(ativo=True).count(),
+        "brinquedos_destaque": Brinquedo.objects.filter(destaque=True, ativo=True).count(),
+        "depoimentos_total": Depoimento.objects.count(),
+        "depoimentos_aprovados": Depoimento.objects.filter(aprovado=True).count(),
+        "depoimentos_pendentes": Depoimento.objects.filter(aprovado=False).count(),
+        "top_brinquedos": brinquedos_contagem.most_common(5),
+        "relatorio_mensal": relatorio_mensal,
     })
 
 
@@ -343,6 +398,37 @@ def depoimento_aprovar(request, did):
     d.aprovado = True
     d.save()
     messages.success(request, "Depoimento aprovado.")
+    return redirect("painel")
+
+
+@staff_required
+@require_POST
+def depoimento_criar(request):
+    nome = (request.POST.get("nome") or "").strip()
+    texto = (request.POST.get("texto") or "").strip()
+    if not nome or not texto:
+        messages.error(request, "Informe o nome e o texto do depoimento.")
+        return redirect("painel")
+    Depoimento.objects.create(
+        nome=nome,
+        texto=texto,
+        imagem_url=(request.POST.get("imagem_url") or "").strip(),
+        aprovado=bool(request.POST.get("aprovado")),
+    )
+    messages.success(request, "Depoimento adicionado.")
+    return redirect("painel")
+
+
+@staff_required
+@require_POST
+def depoimento_editar(request, did):
+    d = get_object_or_404(Depoimento, pk=did)
+    d.nome = (request.POST.get("nome") or d.nome).strip()
+    d.texto = (request.POST.get("texto") or d.texto).strip()
+    d.imagem_url = (request.POST.get("imagem_url") or "").strip()
+    d.aprovado = bool(request.POST.get("aprovado"))
+    d.save()
+    messages.success(request, "Depoimento atualizado.")
     return redirect("painel")
 
 

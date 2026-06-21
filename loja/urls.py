@@ -19,6 +19,7 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("painel/", views.painel, name="painel"),
     path("painel/agenda/", views.agenda, name="agenda"),
+    path("painel/relatorios/", views.relatorios, name="relatorios"),
 
     # Ações do painel
     path("painel/brinquedos/criar/", views.brinquedo_criar, name="brinquedo_criar"),
@@ -26,6 +27,8 @@ urlpatterns = [
     path("painel/brinquedos/<int:bid>/excluir/", views.brinquedo_excluir, name="brinquedo_excluir"),
     path("painel/reservas/<uuid:rid>/status/", views.reserva_status, name="reserva_status"),
     path("painel/depoimentos/<int:did>/aprovar/", views.depoimento_aprovar, name="depoimento_aprovar"),
+    path("painel/depoimentos/criar/", views.depoimento_criar, name="depoimento_criar"),
+    path("painel/depoimentos/<int:did>/editar/", views.depoimento_editar, name="depoimento_editar"),
     path("painel/depoimentos/<int:did>/excluir/", views.depoimento_excluir, name="depoimento_excluir"),
     path("painel/bloqueios/criar/", views.bloqueio_criar, name="bloqueio_criar"),
     path("painel/bloqueios/<int:bid>/excluir/", views.bloqueio_excluir, name="bloqueio_excluir"),

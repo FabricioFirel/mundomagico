@@ -4,19 +4,24 @@
 {% block content %}
 <section class="admin">
   <div class="admin-head">
-    <h1>Painel administrativo</h1>
+    <div>
+      <h1>Dashboard administrativo</h1>
+      <p class="admin-subtitulo">Olá, {{ request.user.username }}. Gerencie toda a operação em um só lugar.</p>
+    </div>
     <div class="admin-head-acoes">
-      <a href="{% url 'agenda' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-calendar-days"></i> Agenda</a>
-      <a href="/admin/" class="btn btn-ghost btn-sm"><i class="fa-solid fa-gear"></i> Admin Django</a>
-      <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+      <a href="{% url 'index' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver site</a>
     </div>
   </div>
 
+  {% include "partials/admin_nav.html" %}
+
   <div class="admin-stats">
     <div class="stat"><span>{{ brinquedos|length }}</span><p>Brinquedos</p></div>
+    <div class="stat"><span>{{ brinquedos_ativos }}</span><p>Ativos no site</p></div>
     <div class="stat"><span>{{ reservas|length }}</span><p>Reservas</p></div>
     <div class="stat"><span>{{ reservas_pendentes }}</span><p>Pendentes</p></div>
     <div class="stat"><span>R$ {{ receita|moeda }}</span><p>Receita (paga)</p></div>
+    <div class="stat"><span>{{ depoimentos_pendentes_total }}</span><p>Depoimentos a revisar</p></div>
   </div>
 
   <div class="admin-card">
@@ -51,22 +56,47 @@
     {% else %}<p class="vazio">Nenhuma reserva ainda.</p>{% endif %}
   </div>
 
-  <div class="admin-card">
-    <h2><i class="fa-solid fa-comment-dots"></i> Depoimentos a aprovar</h2>
-    {% if depoimentos_pendentes %}
-      {% for d in depoimentos_pendentes %}
-      <div class="depo-pendente">
-        <div><strong>{{ d.nome }}</strong><p>{{ d.texto }}</p></div>
-        <div class="depo-acoes">
-          <form method="post" action="{% url 'depoimento_aprovar' d.id %}">{% csrf_token %}<button class="btn btn-sm btn-primary">Aprovar</button></form>
-          <form method="post" action="{% url 'depoimento_excluir' d.id %}">{% csrf_token %}<button class="btn btn-sm btn-danger">Excluir</button></form>
-        </div>
-      </div>
-      {% endfor %}
-    {% else %}<p class="vazio">Nenhum depoimento pendente.</p>{% endif %}
+  <div class="admin-card" id="depoimentos">
+    <h2><i class="fa-solid fa-comment-dots"></i> CRUD de depoimentos</h2>
+    <form method="post" action="{% url 'depoimento_criar' %}" class="form-depoimento-admin">
+      {% csrf_token %}
+      <label>Nome<input type="text" name="nome" required /></label>
+      <label>Imagem (caminho)<input type="text" name="imagem_url" placeholder="img/festa.jpg" /></label>
+      <label class="full">Depoimento<textarea name="texto" rows="3" required></textarea></label>
+      <label class="check"><input type="checkbox" name="aprovado" checked /> Publicar imediatamente</label>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Adicionar depoimento</button>
+    </form>
+
+    <div class="tabela-wrap tabela-depoimentos">
+      <table>
+        <thead><tr><th>Nome</th><th>Depoimento</th><th>Imagem</th><th>Publicado</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for d in depoimentos %}
+          <tr>
+            <form method="post" action="{% url 'depoimento_editar' d.id %}" id="form-d-{{ d.id }}">{% csrf_token %}</form>
+            <td><input form="form-d-{{ d.id }}" type="text" name="nome" value="{{ d.nome }}" /></td>
+            <td><textarea form="form-d-{{ d.id }}" name="texto" rows="3">{{ d.texto }}</textarea></td>
+            <td><input form="form-d-{{ d.id }}" type="text" name="imagem_url" value="{{ d.imagem_url }}" /></td>
+            <td style="text-align:center"><input form="form-d-{{ d.id }}" type="checkbox" name="aprovado" {% if d.aprovado %}checked{% endif %} /></td>
+            <td class="acoes-linha">
+              <button form="form-d-{{ d.id }}" class="btn btn-sm btn-primary">Salvar</button>
+              {% if not d.aprovado %}
+              <form method="post" action="{% url 'depoimento_aprovar' d.id %}">{% csrf_token %}<button class="btn btn-sm btn-ghost">Aprovar</button></form>
+              {% endif %}
+              <form method="post" action="{% url 'depoimento_excluir' d.id %}" onsubmit="return confirm('Remover o depoimento de {{ d.nome }}?')">{% csrf_token %}
+                <button class="btn btn-sm btn-danger">Excluir</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="vazio">Nenhum depoimento cadastrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="admin-card">
+  <div class="admin-card" id="brinquedos">
     <h2><i class="fa-solid fa-plus"></i> Adicionar brinquedo</h2>
     <form method="post" action="{% url 'brinquedo_criar' %}" class="form-brinquedo">
       {% csrf_token %}
